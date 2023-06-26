@@ -1,0 +1,336 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+from google.colab import files
+files.upload()
+
+df =pd.read_csv('Final Data.csv')
+df.shape
+
+df
+
+df.head(6)
+
+df.isnull().sum()
+
+# Binning for target
+bins=[-1,60,100]
+group_names=['able','not able']
+df['result']=pd.cut(df["abnormalchild"],bins,labels=group_names)
+#df[df['abnormalchild']==74]
+df
+
+df['result'].value_counts()
+
+#df2=df[['result']]
+#df2
+
+x=df.drop(['result','abnormalchild'],axis=1)
+
+y=df['result']
+
+y
+
+y.value_counts()
+
+from sklearn.preprocessing import LabelEncoder
+le=LabelEncoder()
+x['BMI']=le.fit_transform(x['BMI'])
+x['Fa. Di']=le.fit_transform(x['Fa. Di'])
+x['Alchoholic']=le.fit_transform(x['Alchoholic'])
+x[' smoke']=le.fit_transform(x[' smoke'])
+x['Diabetis']=le.fit_transform(x['Diabetis'])
+x['Affected Blood']=le.fit_transform(x['Affected Blood'])
+x[' formalin food']=le.fit_transform(x[' formalin food'])
+x['Vaccineded']=le.fit_transform(x['Vaccineded'])
+x['replace  hormone?']=le.fit_transform(x['replace  hormone?'])
+y=le.fit_transform(y)
+
+y
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest=train_test_split(x,y, test_size=.25,random_state=1)
+ytrain
+
+
+from sklearn.tree import DecisionTreeClassifier
+
+dt=DecisionTreeClassifier()
+
+dtt=dt.fit(xtrain,ytrain)
+
+dt.score(xtrain,ytrain)
+
+p1=dt.predict(xtest)
+#pred1=dt.predict_proba(xtest)[:,1]
+#y_score1 = clf_tree.predict_proba(X_test)[:,1]
+p1
+
+from sklearn.metrics import confusion_matrix
+kk=confusion_matrix(ytest,p1)
+
+#from mlxtend.plotting import plot_confusion_matrix
+ 
+#fig, ax = plot_confusion_matrix(conf_mat=kk, figsize=(6, 6))
+#plt.xlabel('Predictions', fontsize=18)
+#plt.ylabel('Actuals', fontsize=18)
+#plt.title('Confusion Matrix', fontsize=18)
+#plt.show()
+
+import seaborn as sns
+sns.heatmap(kk, annot=True)
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,p1))
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+dtproba = dt.predict_proba(xtest)
+dtproba=dtproba[:,0]
+auc=roc_auc_score(ytest,dtproba)
+#print(auc)
+fpr1, tpr1,thre1= roc_curve(ytest,dtproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr1,tpr1)
+plt.legend('Decision_tree ')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('Decision tree ROC')
+plt.show()
+
+from sklearn.neighbors import KNeighborsClassifier
+knn=KNeighborsClassifier(n_neighbors=3)
+knn.fit(xtrain,ytrain)
+
+knn.predict(xtest)
+
+knn.score(xtrain,ytrain)
+
+pred2=knn.predict(xtest)
+pred2
+
+from sklearn.metrics import confusion_matrix
+knnc=confusion_matrix(ytest,pred2)
+from sklearn.metrics import confusion_matrix
+kk=confusion_matrix(ytest,pred2)
+
+#from mlxtend.plotting import plot_confusion_matrix
+ 
+#fig, ax = plot_confusion_matrix(conf_mat=kk, figsize=(6, 6))
+#plt.xlabel('Predictions', fontsize=18)
+#plt.ylabel('Actuals', fontsize=18)
+#plt.title('Confusion Matrix', fontsize=18)
+#plt.show()
+
+import seaborn as sns
+sns.heatmap(knnc, annot=True)
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,pred2))
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+knnproba = knn.predict_proba(xtest)
+knnproba=knnproba[:,0]
+auc=roc_auc_score(ytest,knnproba)
+#print(auc)
+fpr2, tpr2,thre2= roc_curve(ytest,knnproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr2,tpr2,c='r')
+plt.legend('knn')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('KNN ROC')
+plt.show()
+
+from sklearn.ensemble import RandomForestClassifier
+rfc=RandomForestClassifier()
+
+rfc.fit(xtrain,ytrain)
+
+rfc.score(xtrain,ytrain)
+
+pred3=rfc.predict(xtest)
+pred3
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(ytest,pred3)
+
+from sklearn.metrics import confusion_matrix
+rfccn=confusion_matrix(ytest,pred3)
+
+#from mlxtend.plotting import plot_confusion_matrix
+ 
+#fig, ax = plot_confusion_matrix(conf_mat=kk, figsize=(6, 6))
+#plt.xlabel('Predictions', fontsize=18)
+#plt.ylabel('Actuals', fontsize=18)
+#plt.title('Confusion Matrix', fontsize=18)
+#plt.show()
+
+import seaborn as sns
+sns.heatmap(rfccn, annot=True)
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,pred3))
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+rfcproba = knn.predict_proba(xtest)
+rfcproba=rfcproba[:,0]
+auc=roc_auc_score(ytest,rfcproba)
+#print(auc)
+fpr3, tpr3,thre3= roc_curve(ytest,rfcproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr3,tpr3,c='k')
+plt.legend('rfc')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('rfc ROC')
+plt.show()
+
+import xgboost
+m=xgboost.XGBClassifier()
+m.fit(xtrain,ytrain)
+
+m.score(xtrain,ytrain)
+
+pred4=m.predict(xtest)
+pred4
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,pred4))
+
+from sklearn.metrics import confusion_matrix
+xgbcm=confusion_matrix(ytest,pred4)
+
+from sklearn.metrics import confusion_matrix
+xgbcm=confusion_matrix(ytest,pred4)
+
+import seaborn as sns
+sns.heatmap(xgbcm, annot=True)
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+xgbproba = m.predict_proba(xtest)
+xgbproba=xgbproba[:,0]
+auc=roc_auc_score(ytest,xgbproba)
+#print(auc)
+fpr4, tpr4,thre4= roc_curve(ytest,xgbproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr4,tpr4,c='r')
+plt.legend('xgb')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('xgb ROC')
+plt.show()
+
+from sklearn.ensemble import GradientBoostingClassifier
+m2=GradientBoostingClassifier()
+m2.fit(xtrain,ytrain)
+
+pred5=m2.predict(xtest)
+pred5
+
+m2.score(xtest,ytest)
+
+from sklearn.metrics import confusion_matrix
+gbmcm=confusion_matrix(ytest,pred5)
+
+import seaborn as sns
+sns.heatmap(gbmcm, annot=True)
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,pred5))
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+gbmproba = m2.predict_proba(xtest)
+gbmproba=gbmproba[:,0]
+auc=roc_auc_score(ytest,gbmproba)
+#print(auc)
+fpr5, tpr5,thre5= roc_curve(ytest,gbmproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr5,tpr5,c='r')
+plt.legend('gbm')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('gbm ROC')
+plt.show()
+
+import lightgbm as ltb
+
+m3 = ltb.LGBMClassifier()
+m3.fit(xtrain,ytrain)
+
+r=m3.predict(xtest)
+r
+
+m3.score(xtest,ytest)
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(ytest,r)
+
+from sklearn.metrics import confusion_matrix
+lgbm=confusion_matrix(ytest,r)
+
+#from mlxtend.plotting import plot_confusion_matrix
+ 
+#fig, ax = plot_confusion_matrix(conf_mat=kk, figsize=(6, 6))
+#plt.xlabel('Predictions', fontsize=18)
+#plt.ylabel('Actuals', fontsize=18)
+#plt.title('Confusion Matrix', fontsize=18)
+#plt.show()
+
+import seaborn as sns
+sns.heatmap(lgbm, annot=True)
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,r))
+
+from sklearn.metrics import roc_curve
+from sklearn.metrics import roc_auc_score
+lgbmproba = m3.predict_proba(xtest)
+lgbmproba=lgbmproba[:,0]
+auc=roc_auc_score(ytest,lgbmproba)
+#print(auc)
+fpr6, tpr6,thre6= roc_curve(ytest,lgbmproba)
+#fpr
+#create ROC curve
+#plt.plot([0,1],[0,1],linestyle='--')
+plt.plot(fpr6,tpr6,c='r')
+plt.legend('lgbm')
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('lgbm ROC')
+plt.show()
+print('auc=',auc)
+
+plt.plot(fpr1,tpr1,c='b')
+plt.legend('DT')
+plt.plot(fpr2,tpr2,c='g')
+plt.legend('knn')
+plt.plot(fpr3,tpr3,c='r')
+plt.legend('rfc')
+plt.plot(fpr4,tpr4,c='c')
+plt.legend('xgboost')
+plt.plot(fpr5,tpr5,c='m')
+plt.legend('gbm')
+plt.plot(fpr6,tpr6,c='y')
+plt.legend('DKRXGL')
+plt.grid(True)
+plt.ylabel('True Positive Rate')
+plt.xlabel('False Positive Rate')
+plt.title('ROC Comparision')
+plt.show()
+
